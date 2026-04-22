@@ -3,517 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Intelligence</title>
+<title>MarketIQ</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg:        #05070a;
-  --surface:   #0b0f14;
-  --surface2:  #111620;
-  --border:    #1a2030;
-  --border2:   #243040;
-  --green:     #12f7a0;
-  --red:       #ff4060;
-  --yellow:    #ffc542;
-  --blue:      #4d9fff;
-  --text:      #c8d4e0;
-  --text-dim:  #4a5a6a;
-  --text-bright: #eaf2ff;
-  --mono:      'DM Mono', monospace;
-  --sans:      'DM Sans', sans-serif;
-  --display:   'Syne', sans-serif;
+  --bg:#05070a; --surface:#0b0f14; --surface2:#111620; --border:#1a2030; --border2:#243040;
+  --green:#12f7a0; --red:#ff4060; --yellow:#ffc542; --blue:#4d9fff;
+  --text:#c8d4e0; --dim:#4a5a6a; --bright:#eaf2ff;
+  --mono:'DM Mono',monospace; --sans:'DM Sans',sans-serif; --display:'Syne',sans-serif;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,7,10,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;display:flex;align-items:center;height:58px;gap:0;
 }
+.nav-brand{font-family:var(--display);font-size:18px;font-weight:800;letter-spacing:1px;color:var(--bright);margin-right:36px;white-space:nowrap}
+.nav-brand span{color:var(--green)}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto}
+.nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:7px 14px;cursor:pointer;color:var(--dim);border:none;background:none;transition:all .2s;border-radius:6px;text-transform:uppercase;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{color:var(--green);background:rgba(18,247,160,.08)}
 
-/* Subtle noise texture */
-body::after {
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:9999;
-  opacity:.4;
+.page{display:none;padding:36px 28px;max-width:1020px;margin:0 auto}
+.page.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.page-title{font-family:var(--display);font-size:30px;font-weight:800;color:var(--bright);margin-bottom:4px}
+.page-sub{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:28px}
+
+/* inputs */
+.input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+input[type=text],select{background:var(--surface2);border:1px solid var(--border2);color:var(--bright);font-family:var(--mono);font-size:15px;padding:10px 14px;outline:none;border-radius:8px;transition:border-color .2s;letter-spacing:1px}
+input[type=text]{width:150px;text-transform:uppercase}
+select{width:148px;font-size:12px}
+input[type=text]:focus,select:focus{border-color:var(--green)}
+.btn{background:var(--green);color:#000;border:none;font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:2px;padding:10px 24px;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn:hover{background:#0ae090;transform:translateY(-1px);box-shadow:0 4px 20px rgba(18,247,160,.2)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);transform:none;box-shadow:none}
+.btn-sm{font-size:11px;padding:7px 14px;letter-spacing:1px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px}
+.card-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.stat-row:last-child{border-bottom:none}
+.stat-k{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.stat-v{font-family:var(--mono);font-size:12px;color:var(--bright);font-weight:500}
+.stat-v.pos{color:var(--green)}.stat-v.neg{color:var(--red)}
+
+.loading-row{display:none;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--green);margin-bottom:20px}
+.loading-row.show{display:flex}
+.spin{width:13px;height:13px;border:2px solid rgba(18,247,160,.15);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{display:none;background:rgba(255,64,96,.08);border:1px solid rgba(255,64,96,.2);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:12px;color:var(--red);margin-bottom:18px}
+.err.show{display:block}
+
+/* ── HOME ── */
+.ticker-bar{
+  display:flex;gap:12px;overflow-x:auto;margin-bottom:28px;padding-bottom:4px;
 }
-
-/* ── NAV ── */
-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(5,7,10,0.9);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  height: 60px;
+.ticker-bar::-webkit-scrollbar{height:3px}
+.ticker-bar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.index-chip{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:14px 18px;flex-shrink:0;min-width:130px;
 }
+.index-chip .idx-name{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:4px}
+.index-chip .idx-price{font-family:var(--display);font-size:20px;font-weight:700;color:var(--bright)}
+.index-chip .idx-pct{font-family:var(--mono);font-size:12px;margin-top:2px}
+.idx-pct.pos{color:var(--green)}.idx-pct.neg{color:var(--red)}.idx-pct.flat{color:var(--dim)}
 
-.nav-brand {
-  font-family: var(--display);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--text-bright);
-  margin-right: 40px;
-  white-space: nowrap;
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:680px){.home-grid{grid-template-columns:1fr}}
+
+.mover-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.mover-row:last-child{border-bottom:none}
+.mover-info{display:flex;flex-direction:column;gap:2px}
+.mover-ticker{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--bright)}
+.mover-name{font-family:var(--mono);font-size:10px;color:var(--dim);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mover-right{text-align:right}
+.mover-price{font-family:var(--mono);font-size:12px;color:var(--text)}
+.mover-pct{font-family:var(--display);font-size:16px;font-weight:700}
+.mover-pct.up{color:var(--green)}.mover-pct.dn{color:var(--red)}
+
+.home-news-item{
+  background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:8px;
+  border-left:3px solid var(--border2);transition:border-color .2s;cursor:default;
 }
+.home-news-item:hover{border-left-color:var(--green)}
+.home-news-title{font-size:13px;line-height:1.5;color:var(--text);margin-bottom:6px}
+.home-news-meta{display:flex;gap:12px;align-items:center}
+.news-source-tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;background:var(--border);color:var(--dim)}
+.news-source-tag.neutral{border-color:rgba(77,159,255,.2);color:var(--blue)}
+.news-source-tag.left-center{border-color:rgba(255,197,66,.2);color:var(--yellow)}
+.news-source-tag.right-center{border-color:rgba(255,64,96,.2);color:#ff8090}
+.home-news-time{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.home-updated{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;margin-bottom:16px}
+.refresh-btn{background:none;border:1px solid var(--border2);color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.refresh-btn:hover{color:var(--green);border-color:var(--green)}
 
-.nav-brand span { color: var(--green); }
+/* ── PREDICT ── */
+.verdict-card{border-radius:12px;padding:28px;margin-bottom:14px;border:1px solid var(--border)}
+.verdict-card.bullish{border-color:rgba(18,247,160,.25);background:rgba(18,247,160,.04)}
+.verdict-card.bearish{border-color:rgba(255,64,96,.25);background:rgba(255,64,96,.04)}
+.verdict-card.neutral{border-color:rgba(255,197,66,.25);background:rgba(255,197,66,.04)}
+.verdict-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.v-left h2{font-family:var(--display);font-size:34px;font-weight:800;color:var(--bright)}
+.v-left p{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:3px}
+.verdict-word{font-family:var(--display);font-size:38px;font-weight:800;line-height:1}
+.verdict-word.bullish{color:var(--green)}.verdict-word.bearish{color:var(--red)}.verdict-word.neutral{color:var(--yellow)}
+.conf-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--dim);margin-top:4px;text-align:right}
+.prob-bars{display:flex;flex-direction:column;gap:12px}
+.prob-row{display:flex;align-items:center;gap:12px}
+.prob-label{font-family:var(--mono);font-size:11px;width:40px;flex-shrink:0}
+.prob-label.up{color:var(--green)}.prob-label.dn{color:var(--red)}
+.bar-track{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;width:0;transition:width 1s cubic-bezier(.16,1,.3,1)}
+.bar-fill.up{background:var(--green)}.bar-fill.dn{background:var(--red)}
+.prob-num{font-family:var(--display);font-size:24px;font-weight:700;width:54px;text-align:right;flex-shrink:0}
+.prob-num.up{color:var(--green)}.prob-num.dn{color:var(--red)}
 
-.nav-tabs {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-}
+.factor-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.factor-item{display:flex;gap:9px;font-size:13px;line-height:1.5}
+.fdot{font-family:var(--mono);font-weight:700;flex-shrink:0}
+.fdot.b{color:var(--green)}.fdot.r{color:var(--red)}
 
-.nav-tab {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 1px;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: var(--text-dim);
-  border: none;
-  background: none;
-  transition: all 0.2s;
-  border-radius: 6px;
-  text-transform: uppercase;
-}
+.sentiment-pill{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.sentiment-pill.POSITIVE{background:rgba(18,247,160,.1);color:var(--green)}
+.sentiment-pill.NEGATIVE{background:rgba(255,64,96,.1);color:var(--red)}
+.sentiment-pill.MIXED{background:rgba(255,197,66,.1);color:var(--yellow)}
+.sentiment-pill.NEUTRAL{background:rgba(255,255,255,.05);color:var(--dim)}
 
-.nav-tab:hover { color: var(--text); background: var(--surface2); }
-.nav-tab.active { color: var(--green); background: rgba(18,247,160,0.08); }
+.article-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.article-item:last-child{border-bottom:none}
+.article-title{font-size:12px;line-height:1.5;color:var(--text);margin-bottom:4px}
+.article-meta{display:flex;gap:8px;align-items:center}
+.src-badge{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;background:var(--border)}
+.src-badge.neutral{color:var(--blue)}.src-badge.left-center{color:var(--yellow)}.src-badge.right-center{color:#ff8090}
 
-/* ── PAGES ── */
-.page { display: none; padding: 40px 32px; max-width: 1000px; margin: 0 auto; }
-.page.active { display: block; animation: fadeUp 0.3s ease; }
-
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(12px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* ── SHARED COMPONENTS ── */
-.page-header { margin-bottom: 32px; }
-.page-title {
-  font-family: var(--display);
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--text-bright);
-  margin-bottom: 6px;
-}
-.page-subtitle {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-}
-
-.input-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
-  align-items: flex-end;
-}
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
-
-input[type=text], select {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text-bright);
-  font-family: var(--mono);
-  font-size: 16px;
-  padding: 11px 16px;
-  outline: none;
-  border-radius: 8px;
-  transition: border-color 0.2s;
-  letter-spacing: 1px;
-}
-input[type=text] { width: 160px; text-transform: uppercase; }
-select { width: 150px; font-size: 13px; }
-input[type=text]:focus, select:focus { border-color: var(--green); }
-
-.btn {
-  background: var(--green);
-  color: #000;
-  border: none;
-  font-family: var(--display);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  padding: 11px 28px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.btn:hover { background: #0ae090; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(18,247,160,0.2); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
-
-.btn-sm {
-  font-size: 12px;
-  padding: 7px 16px;
-  letter-spacing: 1px;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text-dim);
-  border: 1px solid var(--border2);
-}
-.btn-ghost:hover { background: var(--surface2); color: var(--text); transform: none; box-shadow: none; }
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.card-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media(max-width:640px) { .grid2 { grid-template-columns: 1fr; } }
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.stat-row:last-child { border-bottom: none; }
-.stat-key { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
-.stat-val { font-family: var(--mono); font-size: 13px; color: var(--text-bright); font-weight: 500; }
-.stat-val.pos { color: var(--green); }
-.stat-val.neg { color: var(--red); }
-
-.loading-row {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--green);
-  margin-bottom: 24px;
-}
-.loading-row.show { display: flex; }
-.spin {
-  width: 14px; height: 14px;
-  border: 2px solid rgba(18,247,160,0.15);
-  border-top-color: var(--green);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-.error-msg {
-  display: none;
-  background: rgba(255,64,96,0.08);
-  border: 1px solid rgba(255,64,96,0.2);
-  border-radius: 8px;
-  padding: 14px 18px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--red);
-  margin-bottom: 20px;
-}
-.error-msg.show { display: block; }
-
-/* ── PREDICT TAB ── */
-.verdict-card {
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border);
-}
-.verdict-card.bullish { border-color: rgba(18,247,160,0.25); background: rgba(18,247,160,0.04); }
-.verdict-card.bearish { border-color: rgba(255,64,96,0.25);  background: rgba(255,64,96,0.04); }
-.verdict-card.neutral { border-color: rgba(255,197,66,0.25); background: rgba(255,197,66,0.04); }
-
-.verdict-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
-.v-left h2 { font-family: var(--display); font-size: 38px; font-weight:800; color: var(--text-bright); }
-.v-left p  { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top:4px; }
-.v-right { text-align:right; }
-.verdict-word { font-family: var(--display); font-size: 42px; font-weight:800; line-height:1; }
-.verdict-word.bullish { color: var(--green); }
-.verdict-word.bearish { color: var(--red); }
-.verdict-word.neutral { color: var(--yellow); }
-.conf-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-top:4px; }
-
-.prob-bars { display:flex; flex-direction:column; gap:14px; }
-.prob-row  { display:flex; align-items:center; gap:14px; }
-.prob-label { font-family:var(--mono); font-size:11px; width:44px; flex-shrink:0; }
-.prob-label.up { color: var(--green); }
-.prob-label.dn { color: var(--red); }
-.bar-track { flex:1; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
-.bar-fill  { height:100%; border-radius:3px; width:0; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
-.bar-fill.up { background: var(--green); }
-.bar-fill.dn { background: var(--red); }
-.prob-num { font-family:var(--display); font-size:26px; font-weight:700; width:58px; text-align:right; flex-shrink:0; }
-.prob-num.up { color: var(--green); }
-.prob-num.dn { color: var(--red); }
-
-.factor-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
-.factor-item { display:flex; gap:10px; font-size:13px; line-height:1.5; }
-.fdot { font-family:var(--mono); font-weight:700; flex-shrink:0; }
-.fdot.b { color:var(--green); }
-.fdot.r { color:var(--red); }
-
-.sentiment-pill {
-  display:inline-block;
-  font-family:var(--mono);
-  font-size:10px;
-  letter-spacing:2px;
-  padding:4px 10px;
-  border-radius:20px;
-  margin-bottom:12px;
-}
-.sentiment-pill.POSITIVE { background:rgba(18,247,160,0.1); color:var(--green); }
-.sentiment-pill.NEGATIVE { background:rgba(255,64,96,0.1);  color:var(--red); }
-.sentiment-pill.MIXED    { background:rgba(255,197,66,0.1); color:var(--yellow); }
-.sentiment-pill.NEUTRAL  { background:rgba(255,255,255,0.05); color:var(--text-dim); }
-
-.headline-item {
-  padding: 9px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--text);
-}
-.headline-item:last-child { border-bottom:none; }
-.headline-item::before { content:'→ '; color:var(--green); font-family:var(--mono); font-size:11px; }
-
-.score-bar-row { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
-.score-bar-key { font-family:var(--mono); font-size:11px; color:var(--text-dim); width:90px; flex-shrink:0; }
-.score-track { flex:1; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; position:relative; }
-.score-track::before { content:''; position:absolute; left:50%; top:-3px; width:1px; height:11px; background:var(--border2); }
-.score-fill { height:100%; border-radius:3px; position:absolute; transition: all 1s cubic-bezier(0.16,1,0.3,1); }
-.score-num { font-family:var(--mono); font-size:12px; width:36px; text-align:right; flex-shrink:0; }
+.score-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.score-bar-key{font-family:var(--mono);font-size:11px;color:var(--dim);width:88px;flex-shrink:0}
+.score-track{flex:1;height:4px;background:rgba(255,255,255,.05);border-radius:2px;position:relative}
+.score-track::before{content:'';position:absolute;left:50%;top:-3px;width:1px;height:10px;background:var(--border2)}
+.score-fill{height:100%;border-radius:2px;position:absolute;transition:all 1s cubic-bezier(.16,1,.3,1)}
+.score-num{font-family:var(--mono);font-size:11px;width:34px;text-align:right;flex-shrink:0}
 
 /* ── NEWS TAB ── */
-.news-grid { display:flex; flex-direction:column; gap:10px; }
-.news-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 20px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text);
-  transition: border-color 0.2s;
-}
-.news-item:hover { border-color: var(--border2); }
-.news-item::before { content:'↗ '; color:var(--green); font-family:var(--mono); font-size:11px; }
-.news-meta {
-  display:flex;
-  gap:16px;
-  margin-top:12px;
-  padding-top:12px;
-  border-top:1px solid var(--border);
-}
-.news-stat { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
-.news-stat strong { color:var(--text); }
+.news-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--dim);cursor:pointer;transition:all .2s;text-transform:uppercase}
+.filter-btn:hover{color:var(--text);border-color:var(--text-dim)}
+.filter-btn.active{background:rgba(18,247,160,.1);color:var(--green);border-color:rgba(18,247,160,.3)}
+.news-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;border-left:3px solid var(--border)}
+.news-card:hover{border-left-color:var(--green)}
+.news-card.left-center{border-left-color:rgba(255,197,66,.4)}
+.news-card.right-center{border-left-color:rgba(255,64,96,.3)}
+.news-card.neutral{border-left-color:rgba(77,159,255,.3)}
+.news-card-title{font-size:14px;line-height:1.55;color:var(--bright);margin-bottom:6px}
+.news-card-summary{font-size:12px;line-height:1.6;color:var(--dim);margin-bottom:8px}
+.news-card-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bias-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+.bias-tag.neutral{background:rgba(77,159,255,.1);color:var(--blue)}
+.bias-tag.left-center{background:rgba(255,197,66,.1);color:var(--yellow)}
+.bias-tag.right-center{background:rgba(255,64,96,.1);color:#ff8090}
+.news-time{font-family:var(--mono);font-size:10px;color:var(--dim)}
 
-/* ── CHART TAB ── */
-.chart-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:16px; }
-.chart-container { position:relative; height:320px; }
-.period-btns { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-.period-btn {
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:1px;
-  padding:6px 14px;
-  border-radius:6px;
-  border:1px solid var(--border2);
-  background:none;
-  color:var(--text-dim);
-  cursor:pointer;
-  transition:all 0.2s;
-}
-.period-btn:hover { color:var(--text); border-color:var(--text-dim); }
-.period-btn.active { background:rgba(18,247,160,0.1); color:var(--green); border-color:rgba(18,247,160,0.3); }
+/* ── CHART ── */
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:14px}
+.chart-container{position:relative;height:300px}
+.period-btns{display:flex;gap:6px;flex-wrap:wrap}
+.period-btn{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--dim);cursor:pointer;transition:all .2s;text-transform:uppercase}
+.period-btn:hover{color:var(--text);border-color:var(--dim)}
+.period-btn.active{background:rgba(18,247,160,.1);color:var(--green);border-color:rgba(18,247,160,.3)}
+.chart-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+@media(max-width:560px){.chart-stats{grid-template-columns:repeat(2,1fr)}}
+.chart-stat{background:var(--surface2);border-radius:8px;padding:12px;text-align:center}
+.chart-stat-val{font-family:var(--display);font-size:20px;font-weight:700;color:var(--bright)}
+.chart-stat-key{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:3px;letter-spacing:1px}
 
-.chart-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
-@media(max-width:600px) { .chart-stats { grid-template-columns:repeat(2,1fr); } }
-.chart-stat { background:var(--surface2); border-radius:8px; padding:14px; text-align:center; }
-.chart-stat-val { font-family:var(--display); font-size:22px; font-weight:700; color:var(--text-bright); }
-.chart-stat-key { font-family:var(--mono); font-size:10px; color:var(--text-dim); margin-top:4px; letter-spacing:1px; }
+/* ── WATCHLIST ── */
+.wl-table{width:100%;border-collapse:collapse}
+.wl-table th{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);padding:0 0 11px;text-align:left;border-bottom:1px solid var(--border)}
+.wl-table td{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.03);font-family:var(--mono);font-size:12px;vertical-align:middle}
+.wl-table tr:last-child td{border-bottom:none}
+.wl-ticker{font-weight:600;color:var(--bright);font-size:14px}
+.wl-name{color:var(--dim);font-size:10px}
+.wl-verdict{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:1px}
+.wl-verdict.BULLISH{color:var(--green)}.wl-verdict.BEARISH{color:var(--red)}.wl-verdict.NEUTRAL{color:var(--yellow)}
+.remove-btn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:3px 7px;border-radius:4px;transition:color .2s}
+.remove-btn:hover{color:var(--red)}
+.empty-state{text-align:center;padding:50px 20px;font-family:var(--mono);font-size:13px;color:var(--dim)}
 
-/* ── WATCHLIST TAB ── */
-.watchlist-table { width:100%; border-collapse:collapse; }
-.watchlist-table th {
-  font-family:var(--mono);
-  font-size:10px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--text-dim);
-  padding:0 0 12px 0;
-  text-align:left;
-  border-bottom:1px solid var(--border);
-}
-.watchlist-table td {
-  padding:14px 0;
-  border-bottom:1px solid rgba(255,255,255,0.03);
-  font-family:var(--mono);
-  font-size:13px;
-  vertical-align:middle;
-}
-.watchlist-table tr:last-child td { border-bottom:none; }
-.wl-ticker { font-weight:600; color:var(--text-bright); font-size:15px; }
-.wl-name   { color:var(--text-dim); font-size:11px; }
-.wl-verdict { font-family:var(--display); font-size:14px; font-weight:700; letter-spacing:1px; }
-.wl-verdict.BULLISH { color:var(--green); }
-.wl-verdict.BEARISH { color:var(--red); }
-.wl-verdict.NEUTRAL { color:var(--yellow); }
-.remove-btn {
-  background:none;
-  border:none;
-  color:var(--text-dim);
-  cursor:pointer;
-  font-size:16px;
-  padding:4px 8px;
-  border-radius:4px;
-  transition:color 0.2s;
-}
-.remove-btn:hover { color:var(--red); }
-.empty-state {
-  text-align:center;
-  padding:60px 20px;
-  font-family:var(--mono);
-  font-size:13px;
-  color:var(--text-dim);
-}
-.empty-state p { margin-top:8px; font-size:12px; }
+/* ── CHAT ── */
+.chat-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:500px}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg{display:flex;flex-direction:column;gap:3px;max-width:82%}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.bot{align-self:flex-start}
+.msg-bubble{padding:11px 15px;border-radius:10px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.msg.user .msg-bubble{background:rgba(18,247,160,.12);color:var(--bright);border-bottom-right-radius:3px}
+.msg.bot .msg-bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:3px}
+.msg-time{font-family:var(--mono);font-size:9px;color:var(--dim)}
+.chat-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-footer input{flex:1;width:auto;font-size:13px;letter-spacing:0;text-transform:none;border-radius:8px}
+.chat-footer .btn{padding:10px 18px;font-size:13px}
+.typing{display:none;align-self:flex-start;background:var(--surface2);border-radius:10px;border-bottom-left-radius:3px;padding:11px 15px}
+.typing.show{display:flex;gap:4px;align-items:center}
+.typing-dot{width:5px;height:5px;background:var(--dim);border-radius:50%;animation:typingBounce 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
 
-/* ── CHAT TAB ── */
-.chat-wrap {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px;
-  display:flex;
-  flex-direction:column;
-  height:520px;
-}
-.chat-messages {
-  flex:1;
-  overflow-y:auto;
-  padding:24px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-.chat-messages::-webkit-scrollbar { width:4px; }
-.chat-messages::-webkit-scrollbar-track { background:transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
-
-.msg { display:flex; flex-direction:column; gap:4px; max-width:80%; }
-.msg.user { align-self:flex-end; align-items:flex-end; }
-.msg.bot  { align-self:flex-start; }
-
-.msg-bubble {
-  padding:12px 16px;
-  border-radius:12px;
-  font-size:14px;
-  line-height:1.6;
-  white-space:pre-wrap;
-}
-.msg.user .msg-bubble {
-  background:rgba(18,247,160,0.12);
-  color:var(--text-bright);
-  border-bottom-right-radius:4px;
-}
-.msg.bot .msg-bubble {
-  background:var(--surface2);
-  color:var(--text);
-  border-bottom-left-radius:4px;
-}
-
-.msg-time {
-  font-family:var(--mono);
-  font-size:10px;
-  color:var(--text-dim);
-}
-
-.chat-footer {
-  padding:16px 20px;
-  border-top:1px solid var(--border);
-  display:flex;
-  gap:10px;
-}
-.chat-footer input {
-  flex:1;
-  width:auto;
-  font-size:14px;
-  letter-spacing:0;
-  text-transform:none;
-  border-radius:8px;
-}
-.chat-footer .btn { padding:11px 20px; font-size:14px; }
-
-.typing {
-  display:none;
-  align-self:flex-start;
-  background:var(--surface2);
-  border-radius:12px;
-  border-bottom-left-radius:4px;
-  padding:12px 16px;
-}
-.typing.show { display:flex; gap:4px; align-items:center; }
-.typing-dot {
-  width:6px; height:6px;
-  background:var(--text-dim);
-  border-radius:50%;
-  animation: typingBounce 1.2s infinite;
-}
-.typing-dot:nth-child(2) { animation-delay:0.2s; }
-.typing-dot:nth-child(3) { animation-delay:0.4s; }
-@keyframes typingBounce {
-  0%,60%,100% { transform:translateY(0); }
-  30% { transform:translateY(-4px); }
-}
-
-/* Disclaimer */
-.disclaimer {
-  text-align:center;
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--text-dim);
-  padding:24px;
-  border-top:1px solid var(--border);
-  margin-top:8px;
-  line-height:1.7;
-}
+.disclaimer{text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim);padding:20px;border-top:1px solid var(--border);margin-top:6px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -521,28 +234,59 @@ input[type=text]:focus, select:focus { border-color: var(--green); }
 <nav>
   <div class="nav-brand">MARKET<span>IQ</span></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('predict')">Predict</button>
-    <button class="nav-tab" onclick="switchTab('news')">News</button>
-    <button class="nav-tab" onclick="switchTab('chart')">Chart</button>
-    <button class="nav-tab" onclick="switchTab('watchlist')">Watchlist</button>
-    <button class="nav-tab" onclick="switchTab('chat')">Chat</button>
+    <button class="nav-tab active" onclick="switchTab('home',this)">Home</button>
+    <button class="nav-tab" onclick="switchTab('predict',this)">Predict</button>
+    <button class="nav-tab" onclick="switchTab('news',this)">News</button>
+    <button class="nav-tab" onclick="switchTab('chart',this)">Chart</button>
+    <button class="nav-tab" onclick="switchTab('watchlist',this)">Watchlist</button>
+    <button class="nav-tab" onclick="switchTab('chat',this)">Chat</button>
   </div>
 </nav>
 
-<!-- ── PREDICT ── -->
-<div class="page active" id="page-predict">
-  <div class="page-header">
-    <div class="page-title">Market Predictor</div>
-    <div class="page-subtitle">Technical + Fundamental + Sentiment Analysis</div>
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="page active" id="page-home">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="page-title">Market Overview</div>
+      <div class="page-sub">Live indices, movers & market news</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="home-updated" id="home-updated">—</span>
+      <button class="refresh-btn" onclick="loadHome()">↻ Refresh</button>
+    </div>
   </div>
 
-  <div class="input-row">
-    <div class="field">
-      <label>Ticker</label>
-      <input type="text" id="p-ticker" placeholder="AAPL" maxlength="6">
+  <div class="loading-row" id="h-loading"><div class="spin"></div><span>Loading market data...</span></div>
+  <div class="err" id="h-error"></div>
+
+  <!-- Index chips -->
+  <div class="ticker-bar" id="h-indices"></div>
+
+  <!-- Movers + news -->
+  <div class="home-grid">
+    <div class="card">
+      <div class="card-label" style="color:var(--green)">▲ Top Risers</div>
+      <div id="h-risers"><div style="font-family:var(--mono);font-size:12px;color:var(--dim)">Loading...</div></div>
     </div>
-    <div class="field">
-      <label>Timeframe</label>
+    <div class="card">
+      <div class="card-label" style="color:var(--red)">▼ Top Fallers</div>
+      <div id="h-fallers"><div style="font-family:var(--mono);font-size:12px;color:var(--dim)">Loading...</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Market News</div>
+    <div id="h-news"><div style="font-family:var(--mono);font-size:12px;color:var(--dim)">Loading...</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ PREDICT ═══════════════ -->
+<div class="page" id="page-predict">
+  <div class="page-title">Market Predictor</div>
+  <div class="page-sub">Technical + Fundamental + Sentiment Analysis</div>
+  <div class="input-row">
+    <div class="field"><label>Ticker</label><input type="text" id="p-ticker" placeholder="AAPL" maxlength="6"></div>
+    <div class="field"><label>Timeframe</label>
       <select id="p-timeframe">
         <option value="1 week">1 Week</option>
         <option value="1 month">1 Month</option>
@@ -551,120 +295,76 @@ input[type=text]:focus, select:focus { border-color: var(--green); }
     </div>
     <button class="btn" id="p-btn" onclick="runPredict()">Analyze</button>
   </div>
-
-  <div class="loading-row" id="p-loading"><div class="spin"></div><span id="p-loading-text">Fetching data...</span></div>
-  <div class="error-msg" id="p-error"></div>
-
+  <div class="loading-row" id="p-loading"><div class="spin"></div><span id="p-ltxt">Fetching data...</span></div>
+  <div class="err" id="p-error"></div>
   <div id="p-results" style="display:none">
-    <div class="verdict-card" id="p-verdict-card">
+    <div class="verdict-card" id="p-vcard">
       <div class="verdict-top">
-        <div class="v-left">
-          <h2 id="p-ticker-display"></h2>
-          <p id="p-name-display"></p>
-        </div>
-        <div class="v-right">
-          <div class="verdict-word" id="p-verdict-word"></div>
-          <div class="conf-tag" id="p-conf-tag"></div>
-        </div>
+        <div class="v-left"><h2 id="p-ticker-disp"></h2><p id="p-name-disp"></p></div>
+        <div style="text-align:right"><div class="verdict-word" id="p-vword"></div><div class="conf-tag" id="p-ctag"></div></div>
       </div>
       <div class="prob-bars">
-        <div class="prob-row">
-          <span class="prob-label up">UP</span>
-          <div class="bar-track"><div class="bar-fill up" id="p-bar-up"></div></div>
-          <span class="prob-num up" id="p-pct-up">—</span>
-        </div>
-        <div class="prob-row">
-          <span class="prob-label dn">DOWN</span>
-          <div class="bar-track"><div class="bar-fill dn" id="p-bar-dn"></div></div>
-          <span class="prob-num dn" id="p-pct-dn">—</span>
-        </div>
+        <div class="prob-row"><span class="prob-label up">UP</span><div class="bar-track"><div class="bar-fill up" id="p-bup"></div></div><span class="prob-num up" id="p-pup">—</span></div>
+        <div class="prob-row"><span class="prob-label dn">DOWN</span><div class="bar-track"><div class="bar-fill dn" id="p-bdn"></div></div><span class="prob-num dn" id="p-pdn">—</span></div>
       </div>
     </div>
-
     <div class="grid2">
-      <div class="card">
-        <div class="card-label">Technical</div>
-        <div id="p-tech"></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Fundamentals</div>
-        <div id="p-fund"></div>
-      </div>
+      <div class="card"><div class="card-label">Technical</div><div id="p-tech"></div></div>
+      <div class="card"><div class="card-label">Fundamentals</div><div id="p-fund"></div></div>
     </div>
-
     <div class="grid2">
-      <div class="card">
-        <div class="card-label">Bullish Factors</div>
-        <ul class="factor-list" id="p-bull"></ul>
-      </div>
-      <div class="card">
-        <div class="card-label">Bearish Factors</div>
-        <ul class="factor-list" id="p-bear"></ul>
-      </div>
+      <div class="card"><div class="card-label">Bullish Factors</div><ul class="factor-list" id="p-bull"></ul></div>
+      <div class="card"><div class="card-label">Bearish Factors</div><ul class="factor-list" id="p-bear"></ul></div>
     </div>
-
     <div class="grid2">
-      <div class="card">
-        <div class="card-label">News</div>
-        <div id="p-news-content"></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Score Breakdown</div>
-        <div id="p-scores" style="margin-top:8px"></div>
-      </div>
+      <div class="card"><div class="card-label">News Coverage</div><div id="p-news-content"></div></div>
+      <div class="card"><div class="card-label">Score Breakdown</div><div id="p-scores" style="margin-top:6px"></div></div>
     </div>
-
-    <div class="disclaimer">
-      For informational purposes only. Not financial advice. Always conduct your own research.
-    </div>
+    <div class="disclaimer">For informational purposes only. Not financial advice. Always conduct your own research.</div>
   </div>
 </div>
 
-<!-- ── NEWS ── -->
+<!-- ═══════════════ NEWS ═══════════════ -->
 <div class="page" id="page-news">
-  <div class="page-header">
-    <div class="page-title">News Feed</div>
-    <div class="page-subtitle">Live headlines and sentiment analysis</div>
-  </div>
+  <div class="page-title">News Feed</div>
+  <div class="page-sub">Multi-source headlines with sentiment analysis</div>
   <div class="input-row">
-    <div class="field">
-      <label>Ticker</label>
-      <input type="text" id="n-ticker" placeholder="AAPL" maxlength="6">
-    </div>
+    <div class="field"><label>Ticker</label><input type="text" id="n-ticker" placeholder="AAPL" maxlength="6"></div>
     <button class="btn" id="n-btn" onclick="runNews()">Get News</button>
   </div>
-  <div class="loading-row" id="n-loading"><div class="spin"></div><span>Fetching headlines...</span></div>
-  <div class="error-msg" id="n-error"></div>
+  <div class="loading-row" id="n-loading"><div class="spin"></div><span>Fetching from multiple sources...</span></div>
+  <div class="err" id="n-error"></div>
   <div id="n-results" style="display:none">
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:14px">
       <div class="card-label">Sentiment Summary</div>
-      <div id="n-sentiment-summary"></div>
+      <div id="n-sent-summary"></div>
     </div>
-    <div class="news-grid" id="n-news-list"></div>
+    <div class="news-filters">
+      <button class="filter-btn active" onclick="filterNews('all',this)">All Sources</button>
+      <button class="filter-btn" onclick="filterNews('neutral',this)">Neutral</button>
+      <button class="filter-btn" onclick="filterNews('left-center',this)">Left-Center</button>
+      <button class="filter-btn" onclick="filterNews('right-center',this)">Right-Center</button>
+    </div>
+    <div id="n-news-list"></div>
   </div>
 </div>
 
-<!-- ── CHART ── -->
+<!-- ═══════════════ CHART ═══════════════ -->
 <div class="page" id="page-chart">
-  <div class="page-header">
-    <div class="page-title">Price Chart</div>
-    <div class="page-subtitle">Interactive historical price data</div>
-  </div>
+  <div class="page-title">Price Chart</div>
+  <div class="page-sub">Interactive historical price data</div>
   <div class="input-row">
-    <div class="field">
-      <label>Ticker</label>
-      <input type="text" id="c-ticker" placeholder="AAPL" maxlength="6">
-    </div>
+    <div class="field"><label>Ticker</label><input type="text" id="c-ticker" placeholder="AAPL" maxlength="6"></div>
     <button class="btn" id="c-btn" onclick="runChart()">Load Chart</button>
   </div>
   <div class="loading-row" id="c-loading"><div class="spin"></div><span>Loading price data...</span></div>
-  <div class="error-msg" id="c-error"></div>
+  <div class="err" id="c-error"></div>
   <div id="c-results" style="display:none">
     <div class="chart-wrap">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <div>
-          <div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--text-bright)" id="c-name"></div>
-          <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);margin-top:2px" id="c-price-display"></div>
+          <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--bright)" id="c-name"></div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px" id="c-price-disp"></div>
         </div>
         <div class="period-btns">
           <button class="period-btn" onclick="changePeriod('1mo')">1M</button>
@@ -674,72 +374,56 @@ input[type=text]:focus, select:focus { border-color: var(--green); }
           <button class="period-btn" onclick="changePeriod('2y')">2Y</button>
         </div>
       </div>
-      <div class="chart-container">
-        <canvas id="priceChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="priceChart"></canvas></div>
       <div class="chart-stats" id="c-stats"></div>
     </div>
   </div>
 </div>
 
-<!-- ── WATCHLIST ── -->
+<!-- ═══════════════ WATCHLIST ═══════════════ -->
 <div class="page" id="page-watchlist">
-  <div class="page-header">
-    <div class="page-title">Watchlist</div>
-    <div class="page-subtitle">Track your stocks at a glance</div>
-  </div>
+  <div class="page-title">Watchlist</div>
+  <div class="page-sub">Track your stocks at a glance</div>
   <div class="input-row">
-    <div class="field">
-      <label>Add Stock</label>
-      <input type="text" id="w-ticker" placeholder="AAPL" maxlength="6">
-    </div>
+    <div class="field"><label>Add Stock</label><input type="text" id="w-ticker" placeholder="AAPL" maxlength="6"></div>
     <button class="btn" onclick="addToWatchlist()">Add</button>
-    <button class="btn btn-ghost btn-sm" onclick="refreshWatchlist()" style="margin-left:4px">Refresh</button>
+    <button class="btn btn-ghost btn-sm" onclick="refreshWatchlist()">↻ Refresh</button>
   </div>
-  <div class="loading-row" id="w-loading"><div class="spin"></div><span>Updating watchlist...</span></div>
-  <div id="w-content">
-    <div class="empty-state" id="w-empty">
-      <div style="font-size:32px">📊</div>
-      <p>No stocks in your watchlist yet.</p>
-      <p style="margin-top:6px">Add a ticker above to get started.</p>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="watchlist-table" id="w-table" style="display:none">
-        <thead>
-          <tr>
-            <th>Stock</th>
-            <th>Price</th>
-            <th>1D</th>
-            <th>7D</th>
-            <th>Verdict</th>
-            <th>Up%</th>
-            <th>RSI</th>
-            <th>Sentiment</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="w-tbody"></tbody>
-      </table>
-    </div>
+  <div class="loading-row" id="w-loading"><div class="spin"></div><span>Updating...</span></div>
+  <div class="empty-state" id="w-empty">
+    <div style="font-size:28px;margin-bottom:8px">📊</div>
+    <div>No stocks in your watchlist yet.</div>
+    <div style="margin-top:4px;font-size:11px">Add a ticker above to get started.</div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="wl-table" id="w-table" style="display:none">
+      <thead><tr>
+        <th>Stock</th><th>Price</th><th>1D</th><th>7D</th>
+        <th>Verdict</th><th>Up%</th><th>RSI</th><th>Sentiment</th><th></th>
+      </tr></thead>
+      <tbody id="w-tbody"></tbody>
+    </table>
   </div>
 </div>
 
-<!-- ── CHAT ── -->
+<!-- ═══════════════ CHAT ═══════════════ -->
 <div class="page" id="page-chat">
-  <div class="page-header">
-    <div class="page-title">Stock Assistant</div>
-    <div class="page-subtitle">Ask anything about any stock</div>
-  </div>
+  <div class="page-title">Stock Assistant</div>
+  <div class="page-sub">Ask anything about any stock</div>
   <div class="chat-wrap">
     <div class="chat-messages" id="chat-messages">
       <div class="msg bot">
-        <div class="msg-bubble">Hey! I can analyze any stock for you. Try asking:<br><br>• "How is AAPL doing?"<br>• "Is NVDA bullish or bearish?"<br>• "What's the RSI for TSLA?"<br>• "Should I buy MSFT?"<br>• "What are the risks for AMZN?"</div>
+        <div class="msg-bubble">Hey! I can analyze any stock for you. Try asking:
+
+• "How is AAPL doing?"
+• "Is NVDA bullish or bearish?"
+• "What is the RSI for TSLA?"
+• "Should I buy MSFT?"
+• "What are the risks for AMZN?"</div>
         <div class="msg-time">Now</div>
       </div>
       <div class="typing" id="typing">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
       </div>
     </div>
     <div class="chat-footer">
@@ -750,369 +434,347 @@ input[type=text]:focus, select:focus { border-color: var(--green); }
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-let chartInstance   = null;
-let currentTicker   = "";
-let currentPeriod   = "3mo";
-let chatContextTicker = null;
+// ── State ──────────────────────────────────────────────────────────────────────
+let chartInstance = null, currentTicker = "", currentPeriod = "3mo";
+let chatCtxTicker = null;
+let allNewsArticles = [];
 
-// ── Tab switching ──────────────────────────────────────────────────────────
-function switchTab(tab) {
+// ── Tabs ───────────────────────────────────────────────────────────────────────
+function switchTab(tab, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
-  event.target.classList.add('active');
+  el.classList.add('active');
+  if (tab === 'home') loadHome();
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-const pc = (v, pre="", suf="") => v !== null && v !== undefined ? pre+v+suf : "N/A";
-const pcc = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
-const r1  = v => v ? Math.round(v*10)/10 : null;
-const r2  = v => v ? Math.round(v*100)/100 : null;
-
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const pcc = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
+const r1  = v => v ? Math.round(v*10)/10 : 'N/A';
+const r2  = v => v ? Math.round(v*100)/100 : 'N/A';
 function fmtCap(c) {
-  if (!c) return "N/A";
-  if (c >= 1e12) return "$"+(c/1e12).toFixed(2)+"T";
-  if (c >= 1e9)  return "$"+(c/1e9).toFixed(2)+"B";
-  if (c >= 1e6)  return "$"+(c/1e6).toFixed(2)+"M";
-  return "$"+c;
+  if (!c) return 'N/A';
+  if (c>=1e12) return '$'+(c/1e12).toFixed(2)+'T';
+  if (c>=1e9)  return '$'+(c/1e9).toFixed(2)+'B';
+  if (c>=1e6)  return '$'+(c/1e6).toFixed(2)+'M';
+  return '$'+c;
 }
-
-function statRow(k, v, cls="") {
-  return `<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val ${cls}">${v}</span></div>`;
+function srow(k,v,cls='') {
+  return `<div class="stat-row"><span class="stat-k">${k}</span><span class="stat-v ${cls}">${v}</span></div>`;
 }
-
-function now() {
-  return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
-
-const loadingMsgs = [
-  "Fetching market data...", "Calculating indicators...",
-  "Scanning news sentiment...", "Running analysis...", "Almost done..."
-];
-
-function startLoading(id, textId) {
-  let i = 0;
+function nowTime() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+const loadMsgs = ['Fetching data...','Calculating indicators...','Scanning news...','Running analysis...','Almost done...'];
+function startLoad(id,txtId) {
   document.getElementById(id).classList.add('show');
-  if (textId) document.getElementById(textId).textContent = loadingMsgs[0];
-  return textId ? setInterval(() => {
-    i = (i+1) % loadingMsgs.length;
-    document.getElementById(textId).textContent = loadingMsgs[i];
-  }, 2000) : null;
+  let i=0;
+  if(txtId) document.getElementById(txtId).textContent=loadMsgs[0];
+  return txtId ? setInterval(()=>{ i=(i+1)%loadMsgs.length; document.getElementById(txtId).textContent=loadMsgs[i]; },2200) : null;
+}
+function stopLoad(id,iv) { document.getElementById(id).classList.remove('show'); if(iv) clearInterval(iv); }
+
+// ── HOME ───────────────────────────────────────────────────────────────────────
+async function loadHome() {
+  document.getElementById('h-error').classList.remove('show');
+  document.getElementById('h-loading').classList.add('show');
+  try {
+    const res  = await fetch('/home-data');
+    const d    = await res.json();
+    if (!res.ok) throw new Error(d.error||'Error');
+
+    // Indices
+    document.getElementById('h-indices').innerHTML = Object.entries(d.indices).map(([name, idx]) => {
+      const cls = idx.pct > 0 ? 'pos' : idx.pct < 0 ? 'neg' : 'flat';
+      const sym = idx.pct >= 0 ? '+' : '';
+      return `<div class="index-chip">
+        <div class="idx-name">${name}</div>
+        <div class="idx-price">${idx.price > 0 ? (idx.price >= 1000 ? idx.price.toLocaleString() : idx.price) : '—'}</div>
+        <div class="idx-pct ${cls}">${sym}${idx.pct}%</div>
+      </div>`;
+    }).join('');
+
+    // Risers
+    document.getElementById('h-risers').innerHTML = d.risers.length
+      ? d.risers.map(s => `<div class="mover-row">
+          <div class="mover-info"><div class="mover-ticker">${s.ticker}</div><div class="mover-name">${s.name}</div></div>
+          <div class="mover-right"><div class="mover-price">$${s.price}</div><div class="mover-pct up">+${s.pct}%</div></div>
+        </div>`).join('')
+      : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim)">No data</div>';
+
+    // Fallers
+    document.getElementById('h-fallers').innerHTML = d.fallers.length
+      ? d.fallers.map(s => `<div class="mover-row">
+          <div class="mover-info"><div class="mover-ticker">${s.ticker}</div><div class="mover-name">${s.name}</div></div>
+          <div class="mover-right"><div class="mover-price">$${s.price}</div><div class="mover-pct dn">${s.pct}%</div></div>
+        </div>`).join('')
+      : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim)">No data</div>';
+
+    // News
+    document.getElementById('h-news').innerHTML = d.market_news.length
+      ? d.market_news.map(a => `<div class="home-news-item">
+          <div class="home-news-title">${a.title}</div>
+          <div class="home-news-meta">
+            <span class="news-source-tag ${a.bias}">${a.source}</span>
+            ${a.published ? `<span class="home-news-time">${a.published}</span>` : ''}
+          </div>
+        </div>`).join('')
+      : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim)">No news available right now.</div>';
+
+    document.getElementById('h-updated').textContent = 'Updated ' + d.updated;
+  } catch(e) {
+    document.getElementById('h-error').textContent = 'Error loading home data: ' + e.message;
+    document.getElementById('h-error').classList.add('show');
+  } finally {
+    document.getElementById('h-loading').classList.remove('show');
+  }
 }
 
-function stopLoading(id, interval) {
-  document.getElementById(id).classList.remove('show');
-  if (interval) clearInterval(interval);
-}
-
-// ── PREDICT ────────────────────────────────────────────────────────────────
+// ── PREDICT ────────────────────────────────────────────────────────────────────
 async function runPredict() {
-  const ticker    = document.getElementById('p-ticker').value.trim().toUpperCase();
-  const timeframe = document.getElementById('p-timeframe').value;
+  const ticker = document.getElementById('p-ticker').value.trim().toUpperCase();
+  const tf     = document.getElementById('p-timeframe').value;
   if (!ticker) return;
-
   document.getElementById('p-error').classList.remove('show');
   document.getElementById('p-results').style.display = 'none';
   document.getElementById('p-btn').disabled = true;
-  const iv = startLoading('p-loading', 'p-loading-text');
-
+  const iv = startLoad('p-loading','p-ltxt');
   try {
-    const res = await fetch('/predict', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ticker, timeframe})
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error || 'Error');
+    const res = await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker,timeframe:tf})});
+    const d   = await res.json();
+    if (!res.ok) throw new Error(d.error||'Error');
+    chatCtxTicker = ticker;
 
-    chatContextTicker = ticker;
+    const vc = document.getElementById('p-vcard');
+    vc.className = 'verdict-card '+d.verdict.toLowerCase();
+    document.getElementById('p-ticker-disp').textContent = d.ticker;
+    document.getElementById('p-name-disp').textContent   = d.name+' · '+d.timeframe;
+    const vw = document.getElementById('p-vword');
+    vw.textContent = d.verdict; vw.className = 'verdict-word '+d.verdict.toLowerCase();
+    document.getElementById('p-ctag').textContent = d.confidence+' CONFIDENCE';
+    setTimeout(()=>{
+      document.getElementById('p-bup').style.width = d.up_prob+'%';
+      document.getElementById('p-bdn').style.width = d.dn_prob+'%';
+      document.getElementById('p-pup').textContent = d.up_prob+'%';
+      document.getElementById('p-pdn').textContent = d.dn_prob+'%';
+    },150);
 
-    const vc = document.getElementById('p-verdict-card');
-    vc.className = 'verdict-card ' + d.verdict.toLowerCase();
-    document.getElementById('p-ticker-display').textContent = d.ticker;
-    document.getElementById('p-name-display').textContent   = d.name + ' · ' + d.timeframe;
-    const vw = document.getElementById('p-verdict-word');
-    vw.textContent = d.verdict;
-    vw.className   = 'verdict-word ' + d.verdict.toLowerCase();
-    document.getElementById('p-conf-tag').textContent = d.confidence + ' CONFIDENCE';
-
-    setTimeout(() => {
-      document.getElementById('p-bar-up').style.width = d.up_prob + '%';
-      document.getElementById('p-bar-dn').style.width = d.dn_prob + '%';
-      document.getElementById('p-pct-up').textContent = d.up_prob + '%';
-      document.getElementById('p-pct-dn').textContent = d.dn_prob + '%';
-    }, 150);
-
-    const t = d.tech, f = d.fund;
+    const t=d.tech, f=d.fund;
     document.getElementById('p-tech').innerHTML =
-      statRow('Price',   '$'+t.current_price) +
-      statRow('1D',      (t.pct_1d>0?'+':'')+t.pct_1d+'%', pcc(t.pct_1d)) +
-      statRow('7D',      (t.pct_7d>0?'+':'')+t.pct_7d+'%', pcc(t.pct_7d)) +
-      statRow('30D',     (t.pct_30d>0?'+':'')+t.pct_30d+'%', pcc(t.pct_30d)) +
-      statRow('RSI',     t.rsi, t.rsi<30?'pos':t.rsi>70?'neg':'') +
-      statRow('SMA20',   '$'+t.sma20) +
-      statRow('SMA50',   '$'+t.sma50) +
-      statRow('Vol',     t.volume_ratio+'x avg') +
-      statRow('52W Hi',  '$'+t.high_52w) +
-      statRow('vs Hi',   t.pct_from_52w_high+'%', pcc(t.pct_from_52w_high));
+      srow('Price','$'+t.current_price)+
+      srow('1D',(t.pct_1d>0?'+':'')+t.pct_1d+'%',pcc(t.pct_1d))+
+      srow('7D',(t.pct_7d>0?'+':'')+t.pct_7d+'%',pcc(t.pct_7d))+
+      srow('30D',(t.pct_30d>0?'+':'')+t.pct_30d+'%',pcc(t.pct_30d))+
+      srow('RSI',t.rsi,t.rsi<30?'pos':t.rsi>70?'neg':'')+
+      srow('SMA20','$'+t.sma20)+srow('SMA50','$'+t.sma50)+
+      srow('Vol',t.volume_ratio+'x avg')+
+      srow('52W Hi','$'+t.high_52w)+srow('vs Hi',t.pct_from_52w_high+'%',pcc(t.pct_from_52w_high));
 
-    const upside = d.upside;
     document.getElementById('p-fund').innerHTML =
-      statRow('Sector',    f.sector||'N/A') +
-      statRow('Mkt Cap',   fmtCap(f.market_cap)) +
-      statRow('P/E',       f.pe_ratio?r1(f.pe_ratio):'N/A') +
-      statRow('Fwd P/E',   f.forward_pe?r1(f.forward_pe):'N/A') +
-      statRow('Beta',      f.beta?r2(f.beta):'N/A') +
-      statRow('Rev Growth', f.revenue_growth?(f.revenue_growth*100).toFixed(1)+'%':'N/A', f.revenue_growth>0?'pos':f.revenue_growth<0?'neg':'') +
-      statRow('Earn Growth',f.earnings_growth?(f.earnings_growth*100).toFixed(1)+'%':'N/A', f.earnings_growth>0?'pos':f.earnings_growth<0?'neg':'') +
-      statRow('Rec',       (f.recommendation||'N/A').replace('_',' ').toUpperCase()) +
-      (upside!==null?statRow('Target', '$'+f.analyst_target+' ('+(upside>0?'+':'')+upside+'%)', pcc(upside)):'');
+      srow('Sector',f.sector||'N/A')+srow('Mkt Cap',fmtCap(f.market_cap))+
+      srow('P/E',r1(f.pe_ratio))+srow('Fwd P/E',r1(f.forward_pe))+srow('Beta',r2(f.beta))+
+      srow('Rev Growth',f.revenue_growth?(f.revenue_growth*100).toFixed(1)+'%':'N/A',f.revenue_growth>0?'pos':f.revenue_growth<0?'neg':'')+
+      srow('Earn Growth',f.earnings_growth?(f.earnings_growth*100).toFixed(1)+'%':'N/A',f.earnings_growth>0?'pos':f.earnings_growth<0?'neg':'')+
+      srow('Rec',(f.recommendation||'N/A').replace('_',' ').toUpperCase())+
+      (d.upside!==null?srow('Target','$'+(f.analyst_target||'N/A')+(d.upside?' ('+(d.upside>0?'+':'')+d.upside+'%)':''),pcc(d.upside)):'');
 
+    const bullish = (d.factors&&d.factors.bullish&&d.factors.bullish.length) ? d.factors.bullish : ['No strong bullish signals'];
+    const bearish = (d.factors&&d.factors.bearish&&d.factors.bearish.length) ? d.factors.bearish : ['No strong bearish signals'];
     document.getElementById('p-bull').innerHTML =
-      (d.factors.bullish.length ? d.factors.bullish : ['No strong bullish signals'])
-      .map(x=>`<li class="factor-item"><span class="fdot b">+</span><span>${x}</span></li>`).join('');
+      bullish.map(x=>`<li class="factor-item"><span class="fdot b">+</span><span>${x}</span></li>`).join('');
     document.getElementById('p-bear').innerHTML =
-      (d.factors.bearish.length ? d.factors.bearish : ['No strong bearish signals'])
-      .map(x=>`<li class="factor-item"><span class="fdot r">−</span><span>${x}</span></li>`).join('');
+      bearish.map(x=>`<li class="factor-item"><span class="fdot r">−</span><span>${x}</span></li>`).join('');
 
     const news = d.news;
     document.getElementById('p-news-content').innerHTML =
       `<span class="sentiment-pill ${news.sentiment_label}">${news.sentiment_label}</span>
-       <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:12px">+${news.bullish_hits} bullish / −${news.bearish_hits} bearish signals</div>` +
-      (news.headlines.length ? news.headlines.map(h=>`<div class="headline-item">${h}</div>`).join('') : '<div class="headline-item" style="color:var(--text-dim)">No headlines found</div>');
+       <div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:10px">+${news.bullish_hits} bullish / −${news.bearish_hits} bearish signals</div>`+
+      (news.articles&&news.articles.length
+        ? news.articles.map(a=>`<div class="article-item">
+            <div class="article-title">${a.title}</div>
+            <div class="article-meta"><span class="src-badge ${a.bias}">${a.source}</span></div>
+          </div>`).join('')
+        : '<div style="font-family:var(--mono);font-size:11px;color:var(--dim)">No articles found</div>');
 
-    const sc = d.scores;
+    const sc=d.scores;
     document.getElementById('p-scores').innerHTML =
-      scoreBarHTML('Technical',   sc.technical) +
-      scoreBarHTML('Fundamental', sc.fundamental) +
-      scoreBarHTML('News',        sc.news);
+      scoreBarHTML('Technical',sc.technical)+scoreBarHTML('Fundamental',sc.fundamental)+scoreBarHTML('News',sc.news);
 
-    document.getElementById('p-results').style.display = 'block';
-    document.getElementById('p-results').scrollIntoView({behavior:'smooth', block:'start'});
-
+    document.getElementById('p-results').style.display='block';
+    document.getElementById('p-results').scrollIntoView({behavior:'smooth',block:'start'});
   } catch(e) {
-    document.getElementById('p-error').textContent = 'Error: ' + e.message;
+    document.getElementById('p-error').textContent='Error: '+e.message;
     document.getElementById('p-error').classList.add('show');
   } finally {
-    stopLoading('p-loading', iv);
-    document.getElementById('p-btn').disabled = false;
+    stopLoad('p-loading',iv);
+    document.getElementById('p-btn').disabled=false;
   }
 }
 
-function scoreBarHTML(label, score) {
-  const pct   = Math.min(100, Math.abs(score) / 80 * 50);
-  const pos   = score >= 0;
-  const color = pos ? 'var(--green)' : 'var(--red)';
-  const left  = pos ? '50%' : (50-pct)+'%';
+function scoreBarHTML(label,score) {
+  const pct   = Math.min(100,Math.abs(score)/80*50);
+  const pos   = score>=0;
+  const color = pos?'var(--green)':'var(--red)';
+  const left  = pos?'50%':(50-pct)+'%';
   return `<div class="score-bar-row">
     <span class="score-bar-key">${label}</span>
-    <div class="score-track">
-      <div class="score-fill" style="left:${left};width:${pct}%;background:${color}"></div>
-    </div>
+    <div class="score-track"><div class="score-fill" style="left:${left};width:${pct}%;background:${color}"></div></div>
     <span class="score-num" style="color:${color}">${score>0?'+':''}${Math.round(score)}</span>
   </div>`;
 }
 
-// ── NEWS ───────────────────────────────────────────────────────────────────
+// ── NEWS ───────────────────────────────────────────────────────────────────────
 async function runNews() {
   const ticker = document.getElementById('n-ticker').value.trim().toUpperCase();
   if (!ticker) return;
   document.getElementById('n-error').classList.remove('show');
-  document.getElementById('n-results').style.display = 'none';
-  document.getElementById('n-btn').disabled = true;
-  const iv = startLoading('n-loading', null);
-
+  document.getElementById('n-results').style.display='none';
+  document.getElementById('n-btn').disabled=true;
+  document.getElementById('n-loading').classList.add('show');
   try {
-    const res = await fetch('/news', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ticker})
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error || 'Error');
+    const res = await fetch('/news',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker})});
+    const d   = await res.json();
+    if (!res.ok) throw new Error(d.error||'Error');
+    allNewsArticles = d.articles||[];
 
-    const s = d.sentiment;
-    document.getElementById('n-sentiment-summary').innerHTML =
-      `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
+    const s=d.sentiment;
+    document.getElementById('n-sent-summary').innerHTML =
+      `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
         <span class="sentiment-pill ${s.sentiment_label}">${s.sentiment_label}</span>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--text-dim)">
-          <span style="color:var(--green)">+${s.bullish_hits}</span> bullish signals &nbsp;
-          <span style="color:var(--red)">−${s.bearish_hits}</span> bearish signals
+        <span style="font-family:var(--mono);font-size:12px;color:var(--dim)">
+          <span style="color:var(--green)">+${s.bullish_hits}</span> bullish &nbsp;
+          <span style="color:var(--red)">−${s.bearish_hits}</span> bearish
         </span>
-       </div>
-       ${s.top_bullish.length?`<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:8px">Bullish keywords: <span style="color:var(--green)">${s.top_bullish.join(', ')}</span></div>`:''}
-       ${s.top_bearish.length?`<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:4px">Bearish keywords: <span style="color:var(--red)">${s.top_bearish.join(', ')}</span></div>`:''}`;
+      </div>
+      ${s.top_bullish.length?`<div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:4px">Bullish keywords: <span style="color:var(--green)">${s.top_bullish.join(', ')}</span></div>`:''}
+      ${s.top_bearish.length?`<div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:3px">Bearish keywords: <span style="color:var(--red)">${s.top_bearish.join(', ')}</span></div>`:''}
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:8px">${allNewsArticles.length} articles from ${[...new Set(allNewsArticles.map(a=>a.source))].join(', ')}</div>`;
 
-    document.getElementById('n-news-list').innerHTML =
-      d.headlines.length
-        ? d.headlines.map(h => `<div class="news-item">${h}</div>`).join('')
-        : '<div class="empty-state"><p>No headlines found for this ticker.</p></div>';
-
-    document.getElementById('n-results').style.display = 'block';
+    renderNewsFilter('all');
+    document.getElementById('n-results').style.display='block';
   } catch(e) {
-    document.getElementById('n-error').textContent = 'Error: ' + e.message;
+    document.getElementById('n-error').textContent='Error: '+e.message;
     document.getElementById('n-error').classList.add('show');
   } finally {
-    stopLoading('n-loading', iv);
-    document.getElementById('n-btn').disabled = false;
+    document.getElementById('n-loading').classList.remove('show');
+    document.getElementById('n-btn').disabled=false;
   }
 }
 
-// ── CHART ──────────────────────────────────────────────────────────────────
+function filterNews(bias, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNewsFilter(bias);
+}
+
+function renderNewsFilter(bias) {
+  const filtered = bias==='all' ? allNewsArticles : allNewsArticles.filter(a=>a.bias===bias);
+  document.getElementById('n-news-list').innerHTML = filtered.length
+    ? filtered.map(a=>`<div class="news-card ${a.bias}">
+        <div class="news-card-title">${a.title}</div>
+        ${a.summary?`<div class="news-card-summary">${a.summary.substring(0,200)}${a.summary.length>200?'...':''}</div>`:''}
+        <div class="news-card-meta">
+          <span class="bias-tag ${a.bias}">${a.bias==='left-center'?'Left-Center':a.bias==='right-center'?'Right-Center':'Neutral'}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">${a.source}</span>
+          ${a.published?`<span class="news-time">${a.published}</span>`:''}
+        </div>
+      </div>`).join('')
+    : `<div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:20px 0">No ${bias==='all'?'':bias+' '}articles found.</div>`;
+}
+
+// ── CHART ──────────────────────────────────────────────────────────────────────
 async function runChart(period) {
   const ticker = document.getElementById('c-ticker').value.trim().toUpperCase();
   if (!ticker) return;
   currentTicker = ticker;
-  currentPeriod = period || currentPeriod;
-
-  document.querySelectorAll('.period-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === periodLabel(currentPeriod));
+  currentPeriod = period||currentPeriod;
+  document.querySelectorAll('.period-btn').forEach(b=>{
+    const labels={'1mo':'1M','3mo':'3M','6mo':'6M','1y':'1Y','2y':'2Y'};
+    b.classList.toggle('active',b.textContent===labels[currentPeriod]);
   });
-
   document.getElementById('c-error').classList.remove('show');
-  document.getElementById('c-btn').disabled = true;
-  const iv = startLoading('c-loading', null);
-
+  document.getElementById('c-btn').disabled=true;
+  document.getElementById('c-loading').classList.add('show');
   try {
-    const res = await fetch('/chart', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ticker, period: currentPeriod})
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error || 'Error');
+    const res = await fetch('/chart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker,period:currentPeriod})});
+    const d   = await res.json();
+    if (!res.ok) throw new Error(d.error||'Error');
 
-    document.getElementById('c-name').textContent = d.name + ' (' + d.ticker + ')';
-
-    const hist    = d.history;
-    const labels  = hist.map(h => h.date);
-    const closes  = hist.map(h => h.close);
-    const first   = closes[0], last = closes[closes.length-1];
-    const pct     = ((last - first) / first * 100).toFixed(2);
-    const isUp    = last >= first;
-    const color   = isUp ? '#12f7a0' : '#ff4060';
-
-    document.getElementById('c-price-display').innerHTML =
+    document.getElementById('c-name').textContent=d.name+' ('+d.ticker+')';
+    const hist=d.history, closes=hist.map(h=>h.close), labels=hist.map(h=>h.date);
+    const first=closes[0], last=closes[closes.length-1];
+    const pct=((last-first)/first*100).toFixed(2), isUp=last>=first;
+    const color=isUp?'#12f7a0':'#ff4060';
+    document.getElementById('c-price-disp').innerHTML=
       `$${last} &nbsp;<span style="color:${color}">${pct>0?'+':''}${pct}%</span> over period`;
 
     if (chartInstance) chartInstance.destroy();
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 0, 320);
-    grad.addColorStop(0, isUp ? 'rgba(18,247,160,0.15)' : 'rgba(255,64,96,0.15)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-    chartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: closes, borderColor: color, backgroundColor: grad,
-          borderWidth: 2, fill: true, tension: 0.3,
-          pointRadius: 0, pointHoverRadius: 5,
-          pointHoverBackgroundColor: color,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#0b0f14',
-            borderColor: '#1a2030',
-            borderWidth: 1,
-            titleColor: '#4a5a6a',
-            bodyColor: '#eaf2ff',
-            titleFont: { family: 'DM Mono', size: 11 },
-            bodyFont: { family: 'DM Mono', size: 13 },
-            callbacks: { label: ctx => ' $' + ctx.parsed.y.toFixed(2) }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.03)' },
-            ticks: { color: '#4a5a6a', font: { family: 'DM Mono', size: 10 }, maxTicksLimit: 8 }
-          },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.03)' },
-            ticks: { color: '#4a5a6a', font: { family: 'DM Mono', size: 10 },
-                     callback: v => '$' + v.toFixed(0) }
-          }
-        }
-      }
+    const ctx=document.getElementById('priceChart').getContext('2d');
+    const grad=ctx.createLinearGradient(0,0,0,300);
+    grad.addColorStop(0,isUp?'rgba(18,247,160,.12)':'rgba(255,64,96,.12)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    chartInstance=new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[{data:closes,borderColor:color,backgroundColor:grad,borderWidth:2,fill:true,tension:.3,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:color}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#0b0f14',borderColor:'#1a2030',borderWidth:1,titleColor:'#4a5a6a',bodyColor:'#eaf2ff',
+          titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},
+          callbacks:{label:ctx=>' $'+ctx.parsed.y.toFixed(2)}}},
+        scales:{
+          x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#4a5a6a',font:{family:'DM Mono',size:9},maxTicksLimit:8}},
+          y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#4a5a6a',font:{family:'DM Mono',size:9},callback:v=>'$'+v.toFixed(0)}}
+        }}
     });
 
-    const hi = Math.max(...closes), lo = Math.min(...closes);
-    const vol = hist.reduce((a,h) => a + h.volume, 0) / hist.length;
-    document.getElementById('c-stats').innerHTML =
+    const hi=Math.max(...closes),lo=Math.min(...closes);
+    const vol=hist.reduce((a,h)=>a+h.volume,0)/hist.length;
+    document.getElementById('c-stats').innerHTML=
       `<div class="chart-stat"><div class="chart-stat-val" style="color:var(--green)">$${hi.toFixed(2)}</div><div class="chart-stat-key">Period High</div></div>
        <div class="chart-stat"><div class="chart-stat-val" style="color:var(--red)">$${lo.toFixed(2)}</div><div class="chart-stat-key">Period Low</div></div>
        <div class="chart-stat"><div class="chart-stat-val" style="color:${isUp?'var(--green)':'var(--red)'}">${pct>0?'+':''}${pct}%</div><div class="chart-stat-key">Period Return</div></div>
        <div class="chart-stat"><div class="chart-stat-val">${(vol/1e6).toFixed(1)}M</div><div class="chart-stat-key">Avg Volume</div></div>`;
-
-    document.getElementById('c-results').style.display = 'block';
+    document.getElementById('c-results').style.display='block';
   } catch(e) {
-    document.getElementById('c-error').textContent = 'Error: ' + e.message;
+    document.getElementById('c-error').textContent='Error: '+e.message;
     document.getElementById('c-error').classList.add('show');
   } finally {
-    stopLoading('c-loading', iv);
-    document.getElementById('c-btn').disabled = false;
+    document.getElementById('c-loading').classList.remove('show');
+    document.getElementById('c-btn').disabled=false;
   }
 }
+function changePeriod(p) { currentPeriod=p; if(currentTicker) runChart(p); }
 
-function changePeriod(p) {
-  currentPeriod = p;
-  if (currentTicker) runChart(p);
-}
-
-function periodLabel(p) {
-  return {
-    '1mo':'1M','3mo':'3M','6mo':'6M','1y':'1Y','2y':'2Y'
-  }[p] || '3M';
-}
-
-// ── WATCHLIST ──────────────────────────────────────────────────────────────
+// ── WATCHLIST ──────────────────────────────────────────────────────────────────
 async function addToWatchlist() {
-  const ticker = document.getElementById('w-ticker').value.trim().toUpperCase();
+  const ticker=document.getElementById('w-ticker').value.trim().toUpperCase();
   if (!ticker) return;
-  await fetch('/watchlist/add', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ticker})
-  });
-  document.getElementById('w-ticker').value = '';
+  await fetch('/watchlist/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker})});
+  document.getElementById('w-ticker').value='';
   refreshWatchlist();
 }
-
 async function removeFromWatchlist(ticker) {
-  await fetch('/watchlist/remove', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ticker})
-  });
+  await fetch('/watchlist/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker})});
   refreshWatchlist();
 }
-
 async function refreshWatchlist() {
   document.getElementById('w-loading').classList.add('show');
   try {
-    const res  = await fetch('/watchlist');
-    const data = await res.json();
-    const list = data.watchlist;
-
+    const res=await fetch('/watchlist'), data=await res.json(), list=data.watchlist;
     if (!list.length) {
-      document.getElementById('w-empty').style.display = 'block';
-      document.getElementById('w-table').style.display = 'none';
+      document.getElementById('w-empty').style.display='block';
+      document.getElementById('w-table').style.display='none';
     } else {
-      document.getElementById('w-empty').style.display = 'none';
-      document.getElementById('w-table').style.display = 'table';
-      document.getElementById('w-tbody').innerHTML = list.map(s => {
-        const pcc1 = s.pct_1d > 0 ? 'pos' : s.pct_1d < 0 ? 'neg' : '';
-        const pcc7 = s.pct_7d > 0 ? 'pos' : s.pct_7d < 0 ? 'neg' : '';
+      document.getElementById('w-empty').style.display='none';
+      document.getElementById('w-table').style.display='table';
+      document.getElementById('w-tbody').innerHTML=list.map(s=>{
+        const c1=pcc(s.pct_1d),c7=pcc(s.pct_7d);
         return `<tr>
           <td><div class="wl-ticker">${s.ticker}</div><div class="wl-name">${s.name}</div></td>
-          <td style="font-family:var(--mono)">$${s.price}</td>
-          <td><span class="stat-val ${pcc1}">${s.pct_1d>0?'+':''}${s.pct_1d}%</span></td>
-          <td><span class="stat-val ${pcc7}">${s.pct_7d>0?'+':''}${s.pct_7d}%</span></td>
+          <td>$${s.price}</td>
+          <td><span class="stat-v ${c1}">${s.pct_1d>0?'+':''}${s.pct_1d}%</span></td>
+          <td><span class="stat-v ${c7}">${s.pct_7d>0?'+':''}${s.pct_7d}%</span></td>
           <td><span class="wl-verdict ${s.verdict}">${s.verdict}</span></td>
-          <td style="font-family:var(--mono);color:var(--green)">${s.up_prob}%</td>
-          <td style="font-family:var(--mono)">${s.rsi}</td>
+          <td style="color:var(--green)">${s.up_prob}%</td>
+          <td>${s.rsi}</td>
           <td><span class="sentiment-pill ${s.sentiment}" style="margin:0;font-size:9px">${s.sentiment}</span></td>
           <td><button class="remove-btn" onclick="removeFromWatchlist('${s.ticker}')">×</button></td>
         </tr>`;
@@ -1122,49 +784,42 @@ async function refreshWatchlist() {
   document.getElementById('w-loading').classList.remove('show');
 }
 
-// ── CHAT ───────────────────────────────────────────────────────────────────
-function appendMsg(text, role) {
-  const typing = document.getElementById('typing');
-  const msgs   = document.getElementById('chat-messages');
-  const div    = document.createElement('div');
-  div.className = 'msg ' + role;
-  div.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">${now()}</div>`;
-  msgs.insertBefore(div, typing);
-  msgs.scrollTop = msgs.scrollHeight;
+// ── CHAT ───────────────────────────────────────────────────────────────────────
+function appendMsg(text,role) {
+  const typing=document.getElementById('typing'), msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML=`<div class="msg-bubble">${text}</div><div class="msg-time">${nowTime()}</div>`;
+  msgs.insertBefore(div,typing);
+  msgs.scrollTop=msgs.scrollHeight;
 }
-
 async function sendChat() {
-  const input   = document.getElementById('chat-input');
-  const message = input.value.trim();
+  const input=document.getElementById('chat-input'), message=input.value.trim();
   if (!message) return;
-
-  appendMsg(message, 'user');
-  input.value = '';
-
-  const typing = document.getElementById('typing');
+  appendMsg(message,'user'); input.value='';
+  const typing=document.getElementById('typing');
   typing.classList.add('show');
-  document.getElementById('chat-messages').scrollTop = 99999;
-
+  document.getElementById('chat-messages').scrollTop=99999;
   try {
-    const res = await fetch('/chat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({message, context_ticker: chatContextTicker})
-    });
-    const d = await res.json();
+    const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,context_ticker:chatCtxTicker})});
+    const d=await res.json();
     typing.classList.remove('show');
-    appendMsg(d.response || 'Sorry, something went wrong.', 'bot');
+    appendMsg(d.response||'Sorry, something went wrong.','bot');
   } catch(e) {
     typing.classList.remove('show');
-    appendMsg('Sorry, I could not connect to the server.', 'bot');
+    appendMsg('Sorry, could not connect to the server.','bot');
   }
 }
 
-// ── Keyboard shortcuts ─────────────────────────────────────────────────────
-document.getElementById('p-ticker').addEventListener('keydown', e => { if(e.key==='Enter') runPredict(); });
-document.getElementById('n-ticker').addEventListener('keydown', e => { if(e.key==='Enter') runNews(); });
-document.getElementById('c-ticker').addEventListener('keydown', e => { if(e.key==='Enter') runChart(); });
-document.getElementById('w-ticker').addEventListener('keydown', e => { if(e.key==='Enter') addToWatchlist(); });
-document.getElementById('chat-input').addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────────
+document.getElementById('p-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') runPredict(); });
+document.getElementById('n-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') runNews(); });
+document.getElementById('c-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') runChart(); });
+document.getElementById('w-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') addToWatchlist(); });
+document.getElementById('chat-input').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+
+// ── Load home on start ─────────────────────────────────────────────────────────
+loadHome();
 </script>
 </body>
 </html>
