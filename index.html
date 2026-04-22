@@ -576,12 +576,12 @@ async function runPredict() {
       srow('Rec',(f.recommendation||'N/A').replace('_',' ').toUpperCase())+
       (d.upside!==null?srow('Target','$'+(f.analyst_target||'N/A')+(d.upside?' ('+(d.upside>0?'+':'')+d.upside+'%)':''),pcc(d.upside)):'');
 
+    const bullish = (d.factors&&d.factors.bullish&&d.factors.bullish.length) ? d.factors.bullish : ['No strong bullish signals'];
+    const bearish = (d.factors&&d.factors.bearish&&d.factors.bearish.length) ? d.factors.bearish : ['No strong bearish signals'];
     document.getElementById('p-bull').innerHTML =
-      (d.factors.bullish.length?d.factors.bullish:['No strong bullish signals'])
-      .map(x=>`<li class="factor-item"><span class="fdot b">+</span><span>${x}</span></li>`).join('');
+      bullish.map(x=>`<li class="factor-item"><span class="fdot b">+</span><span>${x}</span></li>`).join('');
     document.getElementById('p-bear').innerHTML =
-      (d.factors.bearish.length?d.factors.bearish:['No strong bearish signals'])
-      .map(x=>`<li class="factor-item"><span class="fdot r">−</span><span>${x}</span></li>`).join('');
+      bearish.map(x=>`<li class="factor-item"><span class="fdot r">−</span><span>${x}</span></li>`).join('');
 
     const news = d.news;
     document.getElementById('p-news-content').innerHTML =
