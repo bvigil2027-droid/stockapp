@@ -519,7 +519,7 @@ async function loadHome() {
         </div>`).join('')
       : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim)">No news available right now.</div>';
 
-    document.getElementById('h-updated').textContent = 'Updated ' + d.updated;
+    document.getElementById('home-updated').textContent = 'Updated ' + d.updated;
   } catch(e) {
     document.getElementById('h-error').textContent = 'Error loading home data: ' + e.message;
     document.getElementById('h-error').classList.add('show');
