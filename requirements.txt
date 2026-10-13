@@ -2,5 +2,6 @@ flask
 yfinance
 requests
 beautifulsoup4
+pandas
+numpy
 gunicorn
-feedparser
